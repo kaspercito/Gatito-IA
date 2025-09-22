@@ -1,0 +1,16 @@
+{
+  "name": "gatito-bot",
+  "version": "1.0.0",
+  "description": "Bot felino ecuatoriano para Discord: charlas de Guayaquil a Tsáchilas con Gemini IA",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "@google/generative-ai": "^0.2.1"
+  },
+  "author": "Kaspercito",
+  "license": "MIT"
+}
