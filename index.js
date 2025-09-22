@@ -202,7 +202,7 @@ client.on('messageCreate', async (message) => {
             await message.reply(suggestions[Math.floor(Math.random() * suggestions.length)]);
             return;
         } else if (command === 'playlist') {
-            await message.reply('🎵 [Playlist Ecuatoriana Chill](https://open.spotify.com/playlist/37i9dQZF1DX30Agq1s7DqO) – Pasillos, cumbia costeña y toques para vibes de Guayaquil a Santo Domingo. ¡Ponla y cuéntame qué tal! 🐱');
+            await message.reply('🎵 [Playlist Ecuatoriana Chill](https://open.spotify.com/playlist/1sQgFOvLO1r5qRLaIWnOb5?si=3448453c16234869&pt=6195237fc19a8d380083f7edc0f2940d) – Pasillos, cumbia costeña y toques para vibes de Guayaquil a Santo Domingo. ¡Ponla y cuéntame qué tal! 🐱');
             return;
         } else if (command === 'cultura') {
             const facts = [
