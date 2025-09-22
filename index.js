@@ -216,7 +216,7 @@ client.on('messageCreate', async (message) => {
 
     // Si no es comando, chat libre con IA
     if (!model) {
-        return message.reply('¡Ey! Mi conexión a Gemini se enredó en un bus guayaquileño. Configura la API key y vuelve a intentarlo 😂');
+        return message.reply('¡Ey! Mi conexión se enredó en un bus guayaquileño. Configura la API key y vuelve a intentarlo 😂');
     }
     await manejarChat(message);
 });
