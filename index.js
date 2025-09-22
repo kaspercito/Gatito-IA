@@ -5,7 +5,8 @@ const express = require('express');
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-const CHANNEL_ID = '1419498589134000243';
+const CHAT_CHANNEL_ID = '1419498589134000243'; // Canal para chat libre con IA
+const COMMAND_CHANNEL_ID = '1419516036146925619'; // Canal para comandos (sin IA en mensajes normales)
 const MIGUEL_ID = '752987736759205960'; // Tu ID, Miguel
 
 const app = express();
@@ -162,30 +163,33 @@ client.once('ready', async () => {
         status: 'online'
     });
 
-    // Keep-alive: Ping cada 10 min, pero solo si no hay msgs recientes
+    // Keep-alive: Ping cada 10 min en el canal de chat, solo si vacío
     setInterval(async () => {
-        const channel = client.channels.cache.get(CHANNEL_ID);
-        if (channel && !channel.lastMessageId) { // Si vacío
+        const channel = client.channels.cache.get(CHAT_CHANNEL_ID);
+        if (channel && !channel.lastMessageId) {
             await channel.send('🐱 ¡Gatito aquí, explorando vibes de Guayaquil a Santo Domingo! ¿Qué se cuece?');
         }
     }, 600000);
 });
 
 client.on('messageCreate', async (message) => {
-    if (message.author.bot || message.channel.id !== CHANNEL_ID) return; // Solo en el canal
+    if (message.author.bot) return;
 
+    const channelId = message.channel.id;
     const content = message.content.trim();
     if (!content) return;
 
+    // Comandos funcionan en TODOS los canales
     if (content.startsWith('!')) {
         const args = content.slice(1).trim().split(/ +/);
         const command = args.shift().toLowerCase();
 
+        const userName = message.author.id === MIGUEL_ID ? 'Miguel' : 'Angi';
+
         if (command === 'help') {
-            const userName = message.author.id === MIGUEL_ID ? 'Miguel' : 'Angi';
             const helpEmbed = createEmbed('#FFA500', `¡Ayuda de Gatito para ${userName}! 🐱`, 
-                '**Charla Libre:** Solo escribe cualquier cosa (ej: "Hola") y charlamos con IA bacán.\n' +
-                '**Comandos:**\n' +
+                '**Charla Libre (solo en canal de chat):** Escribe cualquier cosa (ej: "Hola") y charlamos con IA bacán.\n' +
+                '**Comandos (en cualquier canal):**\n' +
                 '• **!playlist** - Playlists ecuatorianas chill.\n' +
                 '• **!cultura** - Datos random de Guayaquil y Santo Domingo.\n' +
                 '• **!help** - Esto que ves. 😎\n\n¡Fácil, pana! Todo para vibes ecuatorianas.',
@@ -194,7 +198,7 @@ client.on('messageCreate', async (message) => {
             await message.reply({ embeds: [helpEmbed] });
             return;
         } else if (command === 'playlist') {
-            await message.reply('🎵 [Playlist Ecuatoriana Chill](https://open.spotify.com/playlist/1sQgFOvLO1r5qRLaIWnOb5?si=3448453c16234869&pt=6195237fc19a8d380083f7edc0f2940d) – Pasillos, cumbia costeña y toques para vibes de Guayaquil a Santo Domingo. ¡Ponla y cuéntame qué tal! 🐱');
+            await message.reply('🎵 [Playlist Ecuatoriana Chill](https://open.spotify.com/playlist/1sQgFOvLO1r5qRLaIWnOb5?si=53934b7b78ee4048&pt=1da41bcd58156727eb09b93edf311c42) – Pasillos, cumbia costeña y toques para vibes de Guayaquil a Santo Domingo. ¡Ponla y cuéntame qué tal! 🐱');
             return;
         } else if (command === 'cultura') {
             const facts = [
@@ -206,11 +210,14 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    // Si no es comando, chat libre con IA
-    if (!model) {
-        return message.reply('¡Ey! Mi conexión se enredó en un bus guayaquileño. Configura la API key y vuelve a intentarlo 😂');
+    // Chat libre SOLO en el canal de chat
+    if (channelId === CHAT_CHANNEL_ID && !content.startsWith('!')) {
+        if (!model) {
+            return message.reply('¡Ey! Mi conexión se enredó en un bus guayaquileño. Configura la API key y vuelve a intentarlo 😂');
+        }
+        await manejarChat(message);
     }
-    await manejarChat(message);
+    // En el canal de comandos, mensajes normales se ignoran (no IA)
 });
 
 client.login(TOKEN);
