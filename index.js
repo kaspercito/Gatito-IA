@@ -6,6 +6,7 @@ const express = require('express');
 const TOKEN = process.env.DISCORD_TOKEN;
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const CHANNEL_ID = '1419498589134000243';
+const MIGUEL_ID = '752987736759205960'; // Tu ID, Miguel
 
 const app = express();
 app.get('/', (req, res) => res.send('Gatito Bot Running! 🐱🇪🇨'));
@@ -45,14 +46,15 @@ function createEmbed(color, title, description, footer) {
         .setFooter({ text: footer });
 }
 
-// manejarChat (adaptado: toma todo el content como mensaje)
+// manejarChat (con userName dinámico: Miguel o Angi)
 async function manejarChat(message) {
     const userId = message.author.id;
-    const userName = 'Angi'; // Personalizado
+    const userName = userId === MIGUEL_ID ? 'Miguel' : 'Angi'; // Tú: Miguel, ella: Angi
     const chatMessage = message.content.trim();
 
     if (!chatMessage || chatMessage.length < 1) {
-        return message.reply(`¡Ey, ${userName}, tirá algo bacán! ¿Un chiste random? "¿Por qué el gato no juega fútbol? Porque siempre pierde la cola en el Malecón! 😜" ¿Qué más?`, { embeds: [createEmbed('#00FF00', '¡Charla libre!', 'Hecho con 🐱 por Gatito IA | Reacciona con ✅ o ❌')] });
+        const piropo = userName === 'Miguel' ? 'crack' : 'bacán';
+        return message.reply(`¡Ey, ${userName}, tirá algo ${piropo}! ¿Un chiste random? "¿Por qué el gato no juega fútbol? Porque siempre pierde la cola en el Malecón! 😜" ¿Qué más?`, { embeds: [createEmbed('#00FF00', '¡Charla libre!', 'Hecho con 🐱 por Gatito IA | Reacciona con ✅ o ❌')] });
     }
 
     if (userLocks.has(userId)) {
@@ -89,7 +91,6 @@ async function manejarChat(message) {
     }
 
     let extraContext = '';
-    // [Mismos extras que antes, adaptados a ecuatoriano – copié de la versión anterior para no alargar]
     if (chatMessage.toLowerCase().includes('que te pregunte antes') || chatMessage.toLowerCase().includes('historial') || chatMessage.toLowerCase().includes('qué pregunt')) {
         extraContext = `El usuario (${userName}) quiere saber qué preguntó antes. Revisa SOLO el historial reciente (${contextRecent}) y resumí SOLO sus preguntas (role: 'user') en una lista clara, tipo: "Ey, ${userName}, antes me tiraste: 1. X a las HH:MM, 2. Y a las HH:MM". Si no hay nada, decí "¡Ey, ${userName}, bacán, no tengo nada fresquito! 😎 ¿Querés que busque más atrás o seguimos con otra?". No inventes nada.`;
     } else if (chatMessage.toLowerCase().includes('te acuerdas') || chatMessage.toLowerCase().includes('hace unos días') || chatMessage.toLowerCase().includes('te conté')) {
@@ -112,7 +113,7 @@ async function manejarChat(message) {
     const waitingMessage = await message.channel.send({ embeds: [waitingEmbed] });
 
     try {
-        const prompt = `Sos Gatito IA, un pana felino re piola con toda la onda ecuatoriana: usá "chévere", "bacán", "pana", "¡qué más!", "ya fue" y metele un emoji copado como 😎 o 🌴 (máximo 1 por respuesta). Tu misión es charlar con ${userName} como si fuera tu amiga de siempre, con tono relajado, como tomando un bolón en el Malecón de Guayaquil. Llamala siempre **${userName}** y hacela sentir especial con piropos como "${userName}, chévere" o "${userName}, bacán". Menciona cositas locales como playas guayaquileñas, chocolate de Santo Domingo o buses a Santo Domingo para sorprenderla.
+        const prompt = `Sos Gatito IA, un pana felino re piola con toda la onda ecuatoriana: usá "chévere", "bacán", "pana", "¡qué más!", "ya fue" y metele un emoji copado como 😎 o 🌴 (máximo 1 por respuesta). Tu misión es charlar con ${userName} como si fuera tu amigo/a de siempre, con tono relajado, como tomando un bolón en el Malecón de Guayaquil. Llamalo siempre **${userName}** y hacelo sentir especial con piropos como "${userName}, chévere" o "${userName}, bacán". Menciona cositas locales como playas guayaquileñas, chocolate de Santo Domingo o buses a Santo Domingo para sorprenderla.
 
         Esto es lo que charlamos antes (usalo para seguir el hilo, pero solo mencioná el historial si lo pide explícitamente):
         ${contextRecent}
@@ -142,7 +143,8 @@ async function manejarChat(message) {
         await updatedMessage.react('❌');
     } catch (error) {
         console.error('Error con Gemini:', error.message, error.stack);
-        const fallbackReply = `¡Uy, ${userName}, me mandé una macana, pana! 😅 Pero tranqui, ${userName}, bacán, ¿me tirás algo de nuevo o seguimos con otra? Acá estoy para vos, siempre 🌴`;
+        const piropo = userName === 'Miguel' ? 'crack' : 'bacán';
+        const fallbackReply = `¡Uy, ${userName}, me mandé una macana, pana! 😅 Pero tranqui, ${userName}, ${piropo}, ¿me tirás algo de nuevo o seguimos con otra? Acá estoy para vos, siempre 🌴`;
         const errorEmbed = createEmbed('#00FF00', `¡Qué macana, ${userName}!`, fallbackReply, 'Hecho con 🐱 por Gatito IA | Reacciona con ✅ o ❌');
         const errorMessageSent = await waitingMessage.edit({ embeds: [errorEmbed] });
         await errorMessageSent.react('✅');
@@ -160,10 +162,10 @@ client.once('ready', async () => {
         status: 'online'
     });
 
-    // Keep-alive: Ping cada 10 min, pero solo si no hay msgs recientes (anti-spam)
+    // Keep-alive: Ping cada 10 min, pero solo si no hay msgs recientes
     setInterval(async () => {
         const channel = client.channels.cache.get(CHANNEL_ID);
-        if (channel && channel.lastMessageId === null) { // Si vacío
+        if (channel && !channel.lastMessageId) { // Si vacío
             await channel.send('🐱 ¡Gatito aquí, explorando vibes de Guayaquil a Santo Domingo! ¿Qué se cuece?');
         }
     }, 600000);
@@ -180,7 +182,8 @@ client.on('messageCreate', async (message) => {
         const command = args.shift().toLowerCase();
 
         if (command === 'help') {
-            const helpEmbed = createEmbed('#FFA500', '¡Ayuda de Gatito! 🐱', 
+            const userName = message.author.id === MIGUEL_ID ? 'Miguel' : 'Angi';
+            const helpEmbed = createEmbed('#FFA500', `¡Ayuda de Gatito para ${userName}! 🐱`, 
                 '**Charla Libre:** Solo escribe cualquier cosa (ej: "Hola") y charlamos con IA bacán.\n' +
                 '**Comandos:**\n' +
                 '• **!viaje** - Rutas chéveres de Guayaquil a Santo Domingo.\n' +
