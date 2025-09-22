@@ -186,20 +186,12 @@ client.on('messageCreate', async (message) => {
             const helpEmbed = createEmbed('#FFA500', `¡Ayuda de Gatito para ${userName}! 🐱`, 
                 '**Charla Libre:** Solo escribe cualquier cosa (ej: "Hola") y charlamos con IA bacán.\n' +
                 '**Comandos:**\n' +
-                '• **!viaje** - Rutas chéveres de Guayaquil a Santo Domingo.\n' +
                 '• **!playlist** - Playlists ecuatorianas chill.\n' +
                 '• **!cultura** - Datos random de Guayaquil y Santo Domingo.\n' +
                 '• **!help** - Esto que ves. 😎\n\n¡Fácil, pana! Todo para vibes ecuatorianas.',
                 'Hecho con 🐱 por Gatito IA'
             );
             await message.reply({ embeds: [helpEmbed] });
-            return;
-        } else if (command === 'viaje') {
-            const suggestions = [
-                '¡Bus directo Cooperativa: Guayaquil a Santo Domingo en ~5h, $10-15. Para en la vía, agarra un encebollado y listo! 🚌🇪🇨',
-                'Ruta aventura: Guayaquil > Quevedo > Santo Domingo. Para en una finca de chocolate – ¡gato approved! 🍫'
-            ];
-            await message.reply(suggestions[Math.floor(Math.random() * suggestions.length)]);
             return;
         } else if (command === 'playlist') {
             await message.reply('🎵 [Playlist Ecuatoriana Chill](https://open.spotify.com/playlist/1sQgFOvLO1r5qRLaIWnOb5?si=3448453c16234869&pt=6195237fc19a8d380083f7edc0f2940d) – Pasillos, cumbia costeña y toques para vibes de Guayaquil a Santo Domingo. ¡Ponla y cuéntame qué tal! 🐱');
